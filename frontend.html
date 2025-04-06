@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Chatbot</title>
+  <style>
+    body { font-family: sans-serif; margin: 0; padding: 0; background: #f4f4f4; }
+    .container { max-width: 600px; margin: auto; padding: 20px; background: white; margin-top: 40px; border-radius: 8px; }
+    .chat-box { height: 400px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; border-radius: 5px; margin-bottom: 10px; }
+    .chat-input { display: flex; }
+    .chat-input input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
+    .chat-input button { padding: 10px; background: #007bff; color: white; border: none; border-radius: 4px; margin-left: 5px; }
+    .message { margin-bottom: 10px; }
+    .user { font-weight: bold; color: #007bff; }
+    .bot { font-weight: bold; color: green; }
+    .top-bar { display: flex; justify-content: space-between; margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="top-bar">
+      <div>Hi, {{ username }}</div>
+      <a href="/logout">Logout</a>
+    </div>
+    <div class="chat-box" id="chat-box"></div>
+    <div class="chat-input">
+      <input type="text" id="message" placeholder="Type your message here..." />
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+  <script>
+    const chatBox = document.getElementById('chat-box');
+
+    function appendMessage(sender, text) {
+      const div = document.createElement('div');
+      div.classList.add('message');
+      div.innerHTML = `<span class="${sender}">${sender}:</span> ${text}`;
+      chatBox.appendChild(div);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    async function sendMessage() {
+      const input = document.getElementById("message");
+      const msg = input.value.trim();
+      if (!msg) return;
+      appendMessage("user", msg);
+      input.value = "";
+
+      const res = await fetch("/chatbot", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: msg }),
+      });
+
+      const data = await res.json();
+      appendMessage("bot", data.response);
+    }
+  </script>
+</body>
+</html>
